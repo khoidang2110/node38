@@ -125,13 +125,7 @@ INSERT INTO like_res (user_id, res_id, date_like) VALUES
 (10, 5, '2023-03-20'),
 (3, 8, '2023-03-20');
 
-# câu 1 : tìm 3 người like nhà hàng nhiều nhất
-# inner join
-SELECT COUNT(u.user_id) as " number of likes", u.full_name from like_res as lr 
-inner join users as u on lr.user_id = u.user_id
-group by u.full_name
-order by COUNT(u.user_id) DESC
-limit node30_food
+
 
 -- count, max, min, avg,... group by đi kèm
 
@@ -163,4 +157,116 @@ INSERT INTO rate_res (user_id, res_id, amount, date_rate) VALUES
 
 select * from rate_res 
   
+create TABLE food_type(
+type_id INT PRIMARY KEY AUTO_INCREMENT,
+type_name VARCHAR (100)
+)
+
+INSERT INTO food_type (type_name) VALUES 
+('Italian'),
+('Mexican'),
+('Japanese'),
+('Indian'),
+('Mediterranean');
+  
+  create table food(
+food_id int primary key auto_increment,
+food_name varchar(100),
+image VARCHAR(255),
+price VARCHAR(255),
+decs VARCHAR(255),
+type_id INT,
+FOREIGN KEY(type_id) REFERENCES food_type(type_id)
+)
+ INSERT INTO food (food_name, image, price,decs, type_id) VALUES 
+('Pasta', 'pasta.jpg', '10.99', 'Delicious Italian pasta', 1),
+('Taco', 'taco.jpg', '8.99', 'Authentic Mexican taco', 2),
+('Sushi', 'sushi.jpg', '15.99', 'Fresh Japanese sushi', 3),
+('Curry', 'curry.jpg', '12.99', 'Spicy Indian curry', 4),
+('Hummus', 'hummus.jpg', '7.99', 'Tasty Mediterranean hummus', 5),
+('Pizza', 'pizza.jpg', '11.99', 'Classic Italian pizza', 1),
+('Burrito', 'burrito.jpg', '9.49', 'Hearty Mexican burrito', 2),
+('Ramen', 'ramen.jpg', '13.79', 'Savory Japanese ramen', 3),
+('Biryani', 'biryani.jpg', '14.99', 'Fragrant Indian biryani', 4),
+('Falafel', 'falafel.jpg', '8.99', 'Crunchy Mediterranean falafel', 5),
+('Lasagna', 'lasagna.jpg', '12.49', 'Rich and cheesy Italian lasagna', 1),
+('Enchiladas', 'enchiladas.jpg', '10.99', 'Spicy Mexican enchiladas', 2),
+('Sashimi', 'sashimi.jpg', '16.49', 'Fresh and raw Japanese sashimi', 3),
+('Tandoori Chicken', 'tandoori_chicken.jpg', '13.99', 'Flavorful Indian tandoori chicken', 4),
+('Tabbouleh', 'tabbouleh.jpg', '7.49', 'Refreshing Mediterranean tabbouleh', 5)
+  
+  
+create TABLE order_food(
+user_id INT,
+FOREIGN KEY (user_id) REFERENCES users(user_id),
+food_id int,
+FOREIGN KEY(food_id) REFERENCES food(food_id),
+amount INT,
+code VARCHAR(255),
+arr_sub_id VARCHAR (255)
+)
+
+INSERT INTO order_food (user_id, food_id, amount, code, arr_sub_id) VALUES 
+(1, 1, 2, 'CODE123', 'SUBID456'),
+(2, 3, 1, 'CODE789', 'SUBID101'),
+(3, 5, 3, 'CODE345', 'SUBID222'),
+(1, 2, 1, 'CODE567', 'SUBID777'),
+(2, 4, 2, 'CODE890', 'SUBID333'),
+(3, 6, 2, 'CODE234', 'SUBID999'),
+(1, 7, 1, 'CODE432', 'SUBID111'),
+(2, 8, 2, 'CODE654', 'SUBID888'),
+(3, 9, 3, 'CODE987', 'SUBID444'),
+(1, 10, 1, 'CODE876', 'SUBID555');
+
+CREATE TABLE sub_food(
+sub_id INT PRIMARY KEY auto_increment,
+sub_name VARCHAR(255),
+sub_price FLOAT,
+food_id INT,
+FOREIGN KEY(food_id) REFERENCES food(food_id)
+)
+
+INSERT INTO sub_food (sub_name, sub_price, food_id) VALUES 
+('Extra Cheese', 1.50, 1),
+('Guacamole', 2.00, 2),
+('Miso Soup', 1.75, 3),
+('Naan Bread', 1.25, 4),
+('Tahini Sauce', 1.00, 5),
+('Garlic Bread', 1.50, 6);
+
+# câu 1 : tìm 5 người like nhà hàng nhiều nhất
+# inner join
+SELECT COUNT(u.user_id) as " number of likes", u.full_name from like_res as lr 
+inner join users as u on lr.user_id = u.user_id
+group by u.full_name
+order by COUNT(u.user_id) DESC
+limit 5
+
+# câu 2: tìm 2 nhà hàng có lượt like nhiều nhất
+SELECT COUNT(restaurant.res_id) as " number of likes", restaurant.res_name from like_res 
+inner join restaurant on restaurant.res_id = like_res.res_id
+GROUP by restaurant.res_name
+order by COUNT(restaurant.res_name) DESC
+limit 3 
+
+# câu 3: tìm người đã đặt hàng nhiều nhất
+
+select count(order_food.user_id) as "number of order", users.full_name from users
+INNER JOIN order_food on order_food.user_id = users.user_id
+GROUP BY users.full_name
+order by count(users.full_name) DESC
+limit 1
+
+# câu 4: Tìm người dùng không hoạt động trong hệ thống
+(không đặt hàng, không like, không đánh giá nhà
+hàng).
+
+select * from users as u
+
+left join order_food as od on od.user_id = u.user_id
+left join like_res as lr on lr.user_id = u.user_id
+left join rate_res as rr on rr.user_id = u.user_id
+
+where code is NULL and date_like is NULL and date_rate is null
+
 
