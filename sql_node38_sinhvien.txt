@@ -175,12 +175,6 @@ GROUP BY SINHVIEN.MaSV, SINHVIEN.HoTen
 HAVING COUNT(DISTINCT DIEMHP.DiemHP) >= 2;
 
 
-
-SELECT DMLOP.MaLop , DMLOP.TenLop, COUNT(SINHVIEN.MaSV) as "số sv mỗi lớp"
-from DMLOP
-left join SINHVIEN on DMLOP.MaLop = SINHVIEN.MaLop
-GROUP by DMLOP.MaLop
-
 #10. Cho biết Họ tên sinh viên KHÔNG có học phần điểm HP<5
 SELECT SINHVIEN.HoTen as " hs ko có mon < 5"
 from SINHVIEN
