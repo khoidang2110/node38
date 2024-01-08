@@ -1,0 +1,87 @@
+bài tập sequelize food-restaurant mọi người bị phần nó yêu cầu id thì xem phần này nha, này mình làm câu order: (còn lại code như bài youtube -create)
+
+
+- do mình dùng sequelize-auto nó ko nhận mấy bảng có reationship n-n :
+
+-- ở file init-models.js thêm dòng này : 
+  users.belongsToMany(food, { through: order_food});
+  food.belongsToMany(users, { through: order_food });
+
+
+-- ở file order.js sửa lại: 
+
+import _sequelize from 'sequelize';
+const { Model, Sequelize } = _sequelize;
+
+export default class orders extends Model {
+  static init(sequelize, DataTypes) {
+  return super.init({
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'user_id'
+      }
+    },
+    food_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'food',
+        key: 'food_id'
+      }
+    },
+    amount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    code: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    arr_sub_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    order_id: {
+      autoIncrement: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
+    }
+  }, {
+    sequelize,
+    tableName: 'orders',
+    timestamps: false,
+    indexes: [
+      {
+        name: "PRIMARY",
+        unique: true,
+        using: "BTREE",
+        fields: [
+          { name: "order_id" },
+        ]
+      },
+      {
+        name: "user_id",
+        using: "BTREE",
+        fields: [
+          { name: "user_id" },
+        ]
+      },
+      {
+        name: "food_id",
+        using: "BTREE",
+        fields: [
+          { name: "food_id" },
+        ]
+      },
+    ]
+  });
+  }
+}
+
+
+
+
