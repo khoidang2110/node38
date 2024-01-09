@@ -1,11 +1,14 @@
-bài tập sequelize food-restaurant mọi người bị phần nó yêu cầu id thì xem phần này nha, này mình làm câu order: (còn lại code như bài youtube -create)
-
+bài tập sequelize food-restaurant fix:
 
 - do mình dùng sequelize-auto nó ko nhận mấy bảng có reationship n-n :
 
--- ở file init-models.js thêm dòng này : 
-  users.belongsToMany(food, { through: order_food});
-  food.belongsToMany(users, { through: order_food });
+-- ở file init-models.js thêm dòng này ( quan hệ n -n):
+food.belongsToMany(users, { as: 'user_id_user_orders', through: order_food, foreignKey: "food_id", otherKey: "user_id" });
+  restaurant.belongsToMany(users, { as: 'user_id_users', through: like_res, foreignKey: "res_id", otherKey: "user_id" });
+  restaurant.belongsToMany(users, { as: 'user_id_user_rate_res', through: rate_res, foreignKey: "res_id", otherKey: "user_id" });
+  users.belongsToMany(food, { as: 'food_id_foods', through: order_food, foreignKey: "user_id", otherKey: "food_id" });
+  users.belongsToMany(restaurant, { as: 'res_id_restaurants', through: like_res, foreignKey: "user_id", otherKey: "res_id" });
+  users.belongsToMany(restaurant, { as: 'res_id_restaurant_rate_res', through: rate_res, foreignKey: "user_id", otherKey: "res_id" });
 
 
 -- ở file order.js sửa lại: 
@@ -82,6 +85,119 @@ export default class orders extends Model {
   }
 }
 
+-- ở file like_res.js :
+import _sequelize from 'sequelize';
+const { Model, Sequelize } = _sequelize;
 
+export default class like_res extends Model {
+  static init(sequelize, DataTypes) {
+  return super.init({
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      primaryKey: true,
+      references: {
+        model: 'users',
+        key: 'user_id'
+      }
+    },
+    res_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: true,
+      references: {
+        model: 'restaurant',
+        key: 'res_id'
+      }
+    },
+    date_like: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'like_res',
+    timestamps: false,
+    indexes: [
+      {
+        name: "PRIMARY",
+        unique: true,
+        name: "user_id",
+        using: "BTREE",
+        fields: [
+          { name: "user_id" },
+          { name: "res_id" },
+        ]
+      },
+      {
+        name: "res_id",
+        using: "BTREE",
+        fields: [
+          { name: "res_id" },
+        ]
+      },
+    ]
+  });
+  }
+}
+
+-- ở file rate_res.js: 
+import _sequelize from 'sequelize';
+const { Model, Sequelize } = _sequelize;
+
+export default class rate_res extends Model {
+  static init(sequelize, DataTypes) {
+  return super.init({
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      primaryKey: true,
+      references: {
+        model: 'users',
+        key: 'user_id'
+      }
+    },
+    res_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      primaryKey: true,
+      references: {
+        model: 'restaurant',
+        key: 'res_id'
+      }
+    },
+    amount: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    date_rate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    }
+  }, {
+    sequelize,
+    tableName: 'rate_res',
+    timestamps: false,
+    indexes: [
+      {
+        name: "PRIMARY",
+        unique: true,
+        using: "BTREE",
+        fields: [
+          { name: "user_id" },
+          { name: "res_id" },
+        ]
+      },
+      {
+        name: "res_id",
+        using: "BTREE",
+        fields: [
+          { name: "res_id" },
+        ]
+      },
+    ]
+  });
+  }
+}
 
 
