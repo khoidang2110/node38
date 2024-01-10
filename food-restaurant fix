@@ -1,203 +1,44 @@
 bài tập sequelize food-restaurant fix:
 
-- do mình dùng sequelize-auto nó ko nhận mấy bảng có reationship n-n :
-
--- ở file init-models.js thêm dòng này ( quan hệ n -n):
-food.belongsToMany(users, { as: 'user_id_user_orders', through: order_food, foreignKey: "food_id", otherKey: "user_id" });
-  restaurant.belongsToMany(users, { as: 'user_id_users', through: like_res, foreignKey: "res_id", otherKey: "user_id" });
-  restaurant.belongsToMany(users, { as: 'user_id_user_rate_res', through: rate_res, foreignKey: "res_id", otherKey: "user_id" });
-  users.belongsToMany(food, { as: 'food_id_foods', through: order_food, foreignKey: "user_id", otherKey: "food_id" });
-  users.belongsToMany(restaurant, { as: 'res_id_restaurants', through: like_res, foreignKey: "user_id", otherKey: "res_id" });
-  users.belongsToMany(restaurant, { as: 'res_id_restaurant_rate_res', through: rate_res, foreignKey: "user_id", otherKey: "res_id" });
+- do mình dùng sequelize-auto nó ko nhận mấy bảng có reationship n-n 
+-  vào table plus sửa lại 3 table:
 
 
--- ở file order.js sửa lại: 
+create table like_res(
+user_id int,
+res_id int,
+date_like date,
+constraint like_res_pkey PRIMARY KEY (user_id, res_id)
+)
+ALTER TABLE like_res ADD CONSTRAINT like_res_user_id_fkey FOREIGN key(user_id) REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE like_res ADD CONSTRAINT like_res_res_id_fkey FOREIGN key(res_id) REFERENCES restaurant(res_id) ON DELETE RESTRICT ON UPDATE CASCADE;
 
-import _sequelize from 'sequelize';
-const { Model, Sequelize } = _sequelize;
 
-export default class orders extends Model {
-  static init(sequelize, DataTypes) {
-  return super.init({
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'users',
-        key: 'user_id'
-      }
-    },
-    food_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'food',
-        key: 'food_id'
-      }
-    },
-    amount: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    code: {
-      type: DataTypes.STRING(255),
-      allowNull: true
-    },
-    arr_sub_id: {
-      type: DataTypes.STRING(255),
-      allowNull: true
-    },
-    order_id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    }
-  }, {
-    sequelize,
-    tableName: 'orders',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "order_id" },
-        ]
-      },
-      {
-        name: "user_id",
-        using: "BTREE",
-        fields: [
-          { name: "user_id" },
-        ]
-      },
-      {
-        name: "food_id",
-        using: "BTREE",
-        fields: [
-          { name: "food_id" },
-        ]
-      },
-    ]
-  });
-  }
-}
 
--- ở file like_res.js :
-import _sequelize from 'sequelize';
-const { Model, Sequelize } = _sequelize;
+create TABLE rate_res(
+user_id INT,
+res_id int,
+amount INT,
+date_rate DATE,
+constraint rate_res_pkey PRIMARY KEY (user_id, res_id)
+)
+ALTER TABLE rate_res ADD CONSTRAINT rate_res_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE rate_res ADD CONSTRAINT rate_res_res_id_fkey FOREIGN KEY(res_id) REFERENCES restaurant(res_id) ON DELETE RESTRICT ON UPDATE CASCADE;
 
-export default class like_res extends Model {
-  static init(sequelize, DataTypes) {
-  return super.init({
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      primaryKey: true,
-      references: {
-        model: 'users',
-        key: 'user_id'
-      }
-    },
-    res_id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: true,
-      references: {
-        model: 'restaurant',
-        key: 'res_id'
-      }
-    },
-    date_like: {
-      type: DataTypes.DATEONLY,
-      allowNull: true
-    }
-  }, {
-    sequelize,
-    tableName: 'like_res',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        name: "user_id",
-        using: "BTREE",
-        fields: [
-          { name: "user_id" },
-          { name: "res_id" },
-        ]
-      },
-      {
-        name: "res_id",
-        using: "BTREE",
-        fields: [
-          { name: "res_id" },
-        ]
-      },
-    ]
-  });
-  }
-}
 
--- ở file rate_res.js: 
-import _sequelize from 'sequelize';
-const { Model, Sequelize } = _sequelize;
 
-export default class rate_res extends Model {
-  static init(sequelize, DataTypes) {
-  return super.init({
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      primaryKey: true,
-      references: {
-        model: 'users',
-        key: 'user_id'
-      }
-    },
-    res_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      primaryKey: true,
-      references: {
-        model: 'restaurant',
-        key: 'res_id'
-      }
-    },
-    amount: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    date_rate: {
-      type: DataTypes.DATEONLY,
-      allowNull: true
-    }
-  }, {
-    sequelize,
-    tableName: 'rate_res',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "user_id" },
-          { name: "res_id" },
-        ]
-      },
-      {
-        name: "res_id",
-        using: "BTREE",
-        fields: [
-          { name: "res_id" },
-        ]
-      },
-    ]
-  });
-  }
-}
+create TABLE order_food(
+user_id INT,
+food_id int,
+amount INT,
+code VARCHAR(255),
+arr_sub_id VARCHAR (255),
+constraint oder_food_pkey PRIMARY KEY (user_id,food_id)
+)
+ALTER TABLE order_food ADD CONSTRAINT order_food_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE order_food ADD CONSTRAINT order_food_food_id_fkey FOREIGN KEY(food_id) REFERENCES food(food_id) ON DELETE RESTRICT ON UPDATE CASCADE;
 
+
+
+- dùng sequelize-auto pull lại
 
